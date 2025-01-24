@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+dnspython
+cachetools
+uvicorn
+cachetools
+requests
+pyyaml
+email_validator
