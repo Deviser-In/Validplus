@@ -20,19 +20,36 @@ jobs:
           username: root  # Your server's username
           password: C!4e8),mCaseKAj7 
           script: |
-            cd ~/container/validplus  # Change directory to where your FastAPI app is located
+            echo "Starting deployment process..."
+            
+            # Navigate to FastAPI app directory
+            cd ~/container/validplus
 
+            # Pull the latest changes from the 'live' branch
             echo "Pulling latest code..."
-            git pull origin live  # Pull the latest code from the 'live' branch
+            git fetch origin
+            git checkout live
+            git pull origin live
 
+            # Stop any running FastAPI app
             echo "Stopping old FastAPI app..."
-            pkill -f "uvicorn" || true  # Kill any running uvicorn process (old FastAPI app)
+            pkill -f "uvicorn main:app" || true  # Gracefully stop any running FastAPI app (if any)
 
-            echo "Starting FastAPI app..."
-            source venv/bin/activate  # Activate the virtual environment
-            nohup uvicorn main:app --host 0.0.0.0 --port 8000 --reload &  # Start FastAPI app in the background
+            # Activate virtual environment
+            echo "Activating virtual environment..."
+            source venv/bin/activate
 
+            # Install requirements in case they are updated
+            echo "Installing dependencies..."
+            pip install -r requirements.txt
+
+            # Start the new FastAPI app with Uvicorn in the background
+            echo "Starting new FastAPI app..."
+            nohup uvicorn main:app --host 0.0.0.0 --port 8000 --reload &
+
+            # Optionally, reload Nginx if you are using it to proxy
             echo "Reloading Nginx..."
-            sudo systemctl reload nginx  # Reload Nginx to apply any changes
+            sudo systemctl reload nginx
 
-            echo "Deployment complete!"  # Print a message once the deployment is done
+            echo "Deployment complete! FastAPI app is now live."
+
