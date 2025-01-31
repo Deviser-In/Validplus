@@ -13,30 +13,26 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3  # Checkout the latest code from the repo
 
-      - name: Deploy FastAPI App to Server
+      - name: Deploy to Server
         uses: appleboy/ssh-action@master  # SSH into the server to deploy
         with:
           host: 66.42.92.38  # Your server's IP address
           username: root  # Your server's username
           password: C!4e8),mCaseKAj7 
           script: |
-            # Change to the directory containing your FastAPI app
-            cd ~/container/validplus
+            cd ~/container/validplus  # Change directory to where your FastAPI app is located
 
-            echo "Pulling the latest code..."
+            echo "Pulling latest code..."
             git pull origin live  # Pull the latest code from the 'live' branch
 
-            echo "Setting up Python environment..."
-            # Create a virtual environment and activate it
-            python3 -m venv venv  # Create the virtual environment
+            echo "Setting up virtual environment..."
+            python3 -m venv venv  # Create a new virtual environment
             source venv/bin/activate  # Activate the virtual environment
 
             echo "Installing dependencies..."
-            pip install --upgrade pip  # Upgrade pip to the latest version
-            pip install -r requirements.txt  # Install dependencies from the requirements file
+            pip install --no-cache-dir -r requirements.txt  # Install dependencies from requirements.txt
 
-            echo "Running the FastAPI app with Uvicorn..."
-            # Run the FastAPI app using Uvicorn on port 8000
-            nohup uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload &
+            echo "Running FastAPI app..."
+            nohup uvicorn main:app --host 0.0.0.0 --port 8000 --reload &  # Run the FastAPI app in the background
 
-            echo "Deployment complete! FastAPI app is now live at http://<your-server-ip>:8000"
+            echo "Deployment complete!"  # Print a message once the deployment is done
