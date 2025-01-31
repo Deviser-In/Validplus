@@ -3,36 +3,36 @@ name: Deploy Valid Plus Live
 on:
   push:
     branches:
-      - live  
+      - live  # Triggers the workflow on push to the 'live' branch
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # This runs the job on the latest Ubuntu runner
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3  # Checkout the latest code from the repo
 
       - name: Deploy to Server
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@master  # SSH into the server to deploy
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
+          host: 66.42.92.38  # Your server's IP address
+          username: root  # Your server's username
+          password:C!4e8),mCaseKAj7 
           script: |
-            cd ~/container/validplus
+            cd ~/container/validplus  # Change directory to where your FastAPI app is located
 
             echo "Pulling latest code..."
-            git pull origin live
+            git pull origin live  # Pull the latest code from the 'live' branch
 
             echo "Building Docker image..."
-            docker build -t validplus-app .
+            docker build -t validplus-app .  # Build the Docker image with the latest code
 
             echo "Stopping old container..."
-            docker stop upbeat_mccarthy || true
-            docker rm upbeat_mccarthy || true
+            docker stop upbeat_mccarthy || true  # Stop the old container if it's running
+            docker rm upbeat_mccarthy || true  # Remove the old container
 
             echo "Running new container..."
-            docker run -d --name upbeat_mccarthy -p 8000:80 validplus-app
+            docker run -d --name upbeat_mccarthy -p 8000:80 validplus-app  # Start a new container with the updated image
 
-            echo "Deployment complete!"
+            echo "Deployment complete!"  # Print a message once the deployment is done
