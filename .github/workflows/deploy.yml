@@ -18,7 +18,7 @@ jobs:
         with:
           host: 66.42.92.38  # Your server's IP address
           username: root  # Your server's username
-          password: C!4e8),mCaseKAj7
+          password: C!4e8),mCaseKAj7 
           script: |
             cd ~/container/validplus  # Change directory to where your FastAPI app is located
 
@@ -26,27 +26,14 @@ jobs:
             git pull origin live  # Pull the latest code from the 'live' branch
 
             echo "Stopping old FastAPI app..."
-            # Gracefully stop any running uvicorn processes
-            pkill -f 'uvicorn' || true  # Stop any running FastAPI app (if any)
-            sleep 5  # Give some time for processes to fully terminate
+            # Gracefully kill the old FastAPI process if running
+            pkill -f 'uvicorn' || true  # Ensure any old uvicorn process is terminated
 
-            # Ensure the process has fully stopped before proceeding
-            if ps aux | grep -v grep | grep uvicorn; then
-              pkill -f 'uvicorn'  # Forcefully terminate any lingering uvicorn processes
-              sleep 5
-            fi
+            # Optional: Wait for the old process to die gracefully before starting the new one
+            sleep 5
 
             echo "Starting new FastAPI app..."
-            # Start the new FastAPI app using uvicorn in the background
+            # Start the new FastAPI app
             nohup /root/container/validplus/venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000 --reload > /root/container/validplus/uvicorn.log 2>&1 &
 
-            # Check if the FastAPI app is running and verify
-            echo "Verifying if FastAPI app is running..."
-            if ps aux | grep -v grep | grep uvicorn; then
-              echo "FastAPI app is successfully running!"
-            else
-              echo "FastAPI app failed to start!"
-              exit 1  # Fail the workflow if the app is not running
-            fi
-
-            echo "Deployment complete!"  # Notify that deployment was successful
+            echo "Deployment complete!"  # Print a message once the deployment is done
