@@ -162,7 +162,7 @@ class _SMTPChecker(SMTP):
         Raise `AddressNotDeliverableError`. on negative result.
         """
         try:
-            self.connect(host=host)
+            self.connect(host=host,port=587)
             if not self.__skip_tls:
                 self.starttls(context=self.__tls_context)
             self.ehlo_or_helo_if_needed()

@@ -26,6 +26,7 @@ from app.core.config import (
     ERROR_MESSAGES
 )
 from app.core.disposable_domains import DisposableDomains
+from app.core.validate.validate_email import validate_email
 
 @dataclass
 class QuickVerificationResult:
@@ -276,7 +277,11 @@ class QuickEmailVerifier:
             )
 
             return QuickVerificationResult(
-                is_valid=smtp_check['is_valid'] and not is_honeypot and not domain_check['is_parked'],
+                is_valid=validate_email(
+                    email_address=email,
+                    check_dns=True
+                ),
+                # and not is_honeypot and not domain_check['is_parked'],
                 format_valid=format_valid,
                 domain_valid=domain_check['is_valid'],
                 mailbox_exists=smtp_check['is_valid'],
