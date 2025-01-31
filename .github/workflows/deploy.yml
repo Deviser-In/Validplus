@@ -13,26 +13,30 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3  # Checkout the latest code from the repo
 
-      - name: Deploy to Server
+      - name: Deploy FastAPI App to Server
         uses: appleboy/ssh-action@master  # SSH into the server to deploy
         with:
           host: 66.42.92.38  # Your server's IP address
           username: root  # Your server's username
           password: C!4e8),mCaseKAj7 
           script: |
-            cd ~/container/validplus  # Change directory to where your FastAPI app is located
+            # Change to the directory containing your FastAPI app
+            cd ~/container/validplus
 
-            echo "Pulling latest code..."
+            echo "Pulling the latest code..."
             git pull origin live  # Pull the latest code from the 'live' branch
 
-            echo "Building Docker image..."
-            docker build -t validplus-app .  # Build the Docker image with the latest code
+            echo "Setting up Python environment..."
+            # Create a virtual environment and activate it
+            python3 -m venv venv  # Create the virtual environment
+            source venv/bin/activate  # Activate the virtual environment
 
-            echo "Stopping old container..."
-            docker stop upbeat_mccarthy || true  # Stop the old container if it's running
-            docker rm upbeat_mccarthy || true  # Remove the old container
+            echo "Installing dependencies..."
+            pip install --upgrade pip  # Upgrade pip to the latest version
+            pip install -r requirements.txt  # Install dependencies from the requirements file
 
-            echo "Running new container..."
-            docker run -d --name upbeat_mccarthy -p 8000:80 validplus-app  # Start a new container with the updated image
+            echo "Running the FastAPI app with Uvicorn..."
+            # Run the FastAPI app using Uvicorn on port 8000
+            nohup uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload &
 
-            echo "Deployment complete!"  # Print a message once the deployment is done
+            echo "Deployment complete! FastAPI app is now live at http://<your-server-ip>:8000"
