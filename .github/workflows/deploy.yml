@@ -18,7 +18,7 @@ jobs:
         with:
           host: 66.42.92.38  # Your server's IP address
           username: root  # Your server's username
-          password:C!4e8),mCaseKAj7 
+          password: C!4e8),mCaseKAj7 
           script: |
             cd ~/container/validplus  # Change directory to where your FastAPI app is located
 
