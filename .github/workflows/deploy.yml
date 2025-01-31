@@ -1,54 +1,46 @@
-name: Deploy Valid Plus Live
+name: Deploy FastAPI App
 
 on:
   push:
     branches:
-      - live  # Triggers the workflow on push to the 'live' branch
+      - live  # Runs on push to the 'live' branch
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest  # This runs the job on the latest Ubuntu runner
+    runs-on: ubuntu-latest  # Use the latest Ubuntu runner
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3  # Checkout the latest code from the repo
+      # Step 1: Checkout the latest code from the live branch
+      - name: Checkout code
+        uses: actions/checkout@v3  # Checkout the code in the repository
 
-      - name: Deploy to Server
-        uses: appleboy/ssh-action@master  # SSH into the server to deploy
+      # Step 2: Deploy to the server using SSH
+      - name: Deploy to server
+        uses: appleboy/ssh-action@master  # SSH into the server and deploy
         with:
-          host: 66.42.92.38  # Your server's IP address
-          username: root  # Your server's username
-          password: C!4e8),mCaseKAj7 
+          host: 66.42.92.38  # Replace with your server's IP address
+          username: root  # Use your server's username
+          password: C!4e8),mCaseKAj7  # Use your server's password or SSH key
           script: |
-            echo "Starting deployment process..."
-            
-            # Navigate to FastAPI app directory
-            cd ~/container/validplus
+            # Step 3: Change to the project directory
+            cd ~/container/validplus  # Path to your FastAPI project directory
 
-            # Pull the latest changes from the 'live' branch
+            # Step 4: Pull the latest code from the live branch
             echo "Pulling latest code..."
-            git fetch origin
-            git checkout live
             git pull origin live
 
-            # Stop the old FastAPI app
+            # Step 5: Stop the old FastAPI app (Uvicorn process)
             echo "Stopping old FastAPI app..."
-            pkill -f "uvicorn main:app" || true  # Gracefully stop any running FastAPI app (if any)
+            pkill -f "uvicorn main:app" || true  # Kill any existing uvicorn processes
 
-            # Activate virtual environment
-            echo "Activating virtual environment..."
-            source venv/bin/activate
+            # Step 6: Start the new FastAPI app
+            echo "Starting FastAPI app..."
+            source venv/bin/activate  # Activate the virtual environment
+            nohup uvicorn main:app --host 0.0.0.0 --port 8000 --reload &  # Run Uvicorn in the background
 
-            # Install requirements in case they are updated
-            echo "Installing dependencies..."
-            pip install -r requirements.txt
-
-            # Start the new FastAPI app with Uvicorn in the background
-            echo "Starting new FastAPI app..."
-            nohup uvicorn main:app --host 0.0.0.0 --port 8000 --reload &
-
-            # Reload Nginx (optional, depending on your setup)
+            # Step 7: Reload Nginx to apply any changes
             echo "Reloading Nginx..."
-            sudo systemctl reload nginx
+            sudo systemctl reload nginx  # Reload Nginx to apply any changes
 
-            echo "Deployment complete! FastAPI app is now live."
+            # Step 8: Confirm deployment is complete
+            echo "Deployment complete!"
