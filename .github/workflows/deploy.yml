@@ -31,7 +31,7 @@ jobs:
             git checkout live
             git pull origin live
 
-            # Stop any running FastAPI app
+            # Stop the old FastAPI app
             echo "Stopping old FastAPI app..."
             pkill -f "uvicorn main:app" || true  # Gracefully stop any running FastAPI app (if any)
 
@@ -47,9 +47,8 @@ jobs:
             echo "Starting new FastAPI app..."
             nohup uvicorn main:app --host 0.0.0.0 --port 8000 --reload &
 
-            # Optionally, reload Nginx if you are using it to proxy
+            # Reload Nginx (optional, depending on your setup)
             echo "Reloading Nginx..."
             sudo systemctl reload nginx
 
             echo "Deployment complete! FastAPI app is now live."
-
