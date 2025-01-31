@@ -26,27 +26,27 @@ jobs:
             git pull origin live  # Pull the latest code from the 'live' branch
 
             echo "Stopping old FastAPI app..."
-            # Gracefully stop the existing FastAPI process by killing the running uvicorn processes
+            # Gracefully stop any running uvicorn processes
             pkill -f 'uvicorn' || true  # Stop any running FastAPI app (if any)
             sleep 5  # Give some time for processes to fully terminate
 
-            # Check if there are any lingering uvicorn processes and kill them again if necessary
+            # Ensure the process has fully stopped before proceeding
             if ps aux | grep -v grep | grep uvicorn; then
-              pkill -f 'uvicorn'  # Ensure it is fully terminated
+              pkill -f 'uvicorn'  # Forcefully terminate any lingering uvicorn processes
               sleep 5
             fi
 
             echo "Starting new FastAPI app..."
-            # Run FastAPI with uvicorn in the background, capturing logs for debugging
+            # Start the new FastAPI app using uvicorn in the background
             nohup /root/container/validplus/venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000 --reload > /root/container/validplus/uvicorn.log 2>&1 &
 
-            # Verify that FastAPI is running
+            # Check if the FastAPI app is running and verify
             echo "Verifying if FastAPI app is running..."
             if ps aux | grep -v grep | grep uvicorn; then
               echo "FastAPI app is successfully running!"
             else
               echo "FastAPI app failed to start!"
-              exit 1  # Exit with failure code to notify of a failed deployment
+              exit 1  # Fail the workflow if the app is not running
             fi
 
             echo "Deployment complete!"  # Notify that deployment was successful
