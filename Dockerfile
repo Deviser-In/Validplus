@@ -7,10 +7,16 @@ WORKDIR /app
 # Copy the requirements file into the container
 COPY requirements.txt .
 
-# Install dependencies
+# Install dependencies in the system first
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application code
+# Create a virtual environment
+RUN python -m venv /venv
+
+# Set the virtual environment's bin directory to be the default for Python
+ENV PATH="/venv/bin:$PATH"
+
+# Copy the rest of the application code into the container
 COPY . .
 
 # Expose the port the app runs on
