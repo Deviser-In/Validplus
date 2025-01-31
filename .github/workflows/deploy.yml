@@ -25,14 +25,14 @@ jobs:
             echo "Pulling latest code..."
             git pull origin live  # Pull the latest code from the 'live' branch
 
-            echo "Setting up virtual environment..."
-            python3 -m venv venv  # Create a new virtual environment
+            echo "Stopping old FastAPI app..."
+            pkill -f "uvicorn" || true  # Kill any running uvicorn process (old FastAPI app)
+
+            echo "Starting FastAPI app..."
             source venv/bin/activate  # Activate the virtual environment
+            nohup uvicorn main:app --host 0.0.0.0 --port 8000 --reload &  # Start FastAPI app in the background
 
-            echo "Installing dependencies..."
-            pip install --no-cache-dir -r requirements.txt  # Install dependencies from requirements.txt
-
-            echo "Running FastAPI app..."
-            nohup uvicorn main:app --host 0.0.0.0 --port 8000 --reload &  # Run the FastAPI app in the background
+            echo "Reloading Nginx..."
+            sudo systemctl reload nginx  # Reload Nginx to apply any changes
 
             echo "Deployment complete!"  # Print a message once the deployment is done
